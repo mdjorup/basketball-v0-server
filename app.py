@@ -2,10 +2,13 @@ import json
 import os
 
 from dotenv import load_dotenv
-from firebase_admin import credentials, firestore, initialize_app
-from flask import Flask
+from firebase_admin import auth, credentials, firestore, initialize_app
+from flask import Flask, g, request
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app, origins=["http://localhost:3000", "https://basketball-v0-906cb.web.app", "https://basketball-v0-906cb.firebaseapp.com"] )
+
 
 load_dotenv()
 
@@ -19,6 +22,22 @@ initialize_app(cred)
 
 db = firestore.client()
 
+@app.before_request
+def before_request():
+    auth_header : str = request.headers.get("Authorization", "")
+
+    if auth_header and auth_header.startswith("Bearer "):
+        token : str = auth_header.split("Bearer ")[1]
+        # this is where the token is validated and the user is retrieved
+        try:
+            decoded_token : dict = auth.verify_id_token(token)
+        except auth.InvalidIdTokenError:
+            decoded_token = {}
+        # now use the token to create a user object
+        g.user = decoded_token # will be changed later to user object
+    else:
+        g.user = None
+        
 
 # Users
 @app.route("/")
