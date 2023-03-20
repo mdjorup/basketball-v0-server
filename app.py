@@ -9,7 +9,7 @@ from flask_cors import CORS
 from user.user_handler import create_user
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:3000", "https://basketball-v0-906cb.web.app", "https://basketball-v0-906cb.firebaseapp.com"] )
+CORS(app, origins=["http://localhost:3000", "https://basketball-v0-906cb.web.app/*", "https://basketball-v0-906cb.firebaseapp.com/*"] )
 
 
 load_dotenv()
