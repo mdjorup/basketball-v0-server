@@ -6,6 +6,8 @@ from firebase_admin import auth, credentials, firestore, initialize_app
 from flask import Flask, g, request
 from flask_cors import CORS
 
+from user.user_handler import create_user
+
 app = Flask(__name__)
 CORS(app, origins=["http://localhost:3000", "https://basketball-v0-906cb.web.app", "https://basketball-v0-906cb.firebaseapp.com"] )
 
@@ -31,6 +33,7 @@ def before_request():
         # this is where the token is validated and the user is retrieved
         try:
             decoded_token : dict = auth.verify_id_token(token)
+            # user = auth.get_user(decoded_token["uid"])
         except auth.InvalidIdTokenError:
             decoded_token = {}
         # now use the token to create a user object
@@ -45,9 +48,13 @@ def index():
     return "Hello World"
 
 
-@app.route("/users", methods=["GET", "POST"])
+@app.route("/users", methods=["POST"])
 def users():
-    return ""
+
+    if request.method == "POST":
+        data : dict = request.get_json()
+        return create_user(auth, db, data)
+    return {}
 
 
 @app.route("/users/<user_id>", methods=["GET", "PUT", "DELETE"])
