@@ -1,5 +1,5 @@
-from dataclasses import dataclass, field
-from datetime import datetime
+from dataclasses import asdict, dataclass, field
+from datetime import datetime, timezone
 from typing import Any, Literal
 
 UserRole = Literal['admin', 'standard', 'coach']
@@ -15,12 +15,28 @@ class User:
     uid : str
     name: str
     email: str
-    password: str 
     role: UserRole
     active : bool
     created_at : datetime # unix timestamp
     updated_at : datetime # unix timestamp
 
+    def __init__(self, **kwargs):
+        # Filter out any keys that are not defined in the dataclass
+        filtered_kwargs = {k: v for k, v in kwargs.items() if k in self.__annotations__.keys()}
+
+        for k, v in filtered_kwargs.items():
+            object.__setattr__(self, k, v)
+        
+    
+
+    def update_field(self, key : str, value : Any) -> bool:
+        if key not in self.__annotations__.keys():
+            raise AttributeError("Attribute doesn't exist")
+        elif key == "uid" or key == "email" or key == "created_at" or key == "updated_at":
+            raise AttributeError(f"Unable to edit attribute {key}")
+        object.__setattr__(self, key, value)
+        self.updated_at = datetime.now(timezone.utc)
+        return True
         
 
 

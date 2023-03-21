@@ -22,7 +22,7 @@ class UserService:
         
         auth.set_custom_user_claims(uid, {"role": role})
         current_time: datetime = datetime.now(timezone.utc)
-        user : User = User(uid=uid, name=name, email=email, password=password, role=role, active=True, created_at=current_time, updated_at=current_time)
+        user : User = User(uid=uid, name=name, email=email, role=role, active=True, created_at=current_time, updated_at=current_time)
         
         self.db.collection("users").document(uid).set(asdict(user))
         
@@ -40,15 +40,30 @@ class UserService:
             return None
             
 
-        pass
-
     def update_user(self, user : User) -> bool:
         # updating a user should involve first loading the user using the get_user method in order to pass a User object
-
-        return True
-
-    def delete_user(self, uid : str) -> None:
-        pass
+        uid = user.uid
+        doc_ref = self.db.collection("users").document(uid)
+        doc = doc_ref.get()
+        if doc.exists:
+            doc_ref.set(asdict(user))
+            return True
+        else:
+            return False
+        
+    def delete_user(self, uid : str) -> bool:
+        
+        doc_ref = self.db.collection("users").document(uid)
+        doc = doc_ref.get()
+        if doc.exists:
+            data = doc.to_dict()
+            user : User = User(**data)
+            user.update_field("active", False)
+            doc_ref.set(asdict(user))
+            return True
+        else:
+            return False
+        
 
 
         
