@@ -12,9 +12,12 @@ class UserService:
         pass
 
     def get_user(self, uid : str) -> User:
+
         pass
 
-    def update_user(self, uid : str, data : dict) -> None:
+    def update_user(self, user : User) -> None:
+        # updating a user should involve first loading the user using the get_user method in order to pass a User object
+
         pass
 
     def delete_user(self, uid : str) -> None:
