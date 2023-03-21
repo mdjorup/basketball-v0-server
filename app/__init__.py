@@ -19,6 +19,8 @@ initialize_app(cred)
 
 db = firestore.client()
 
+app.config["FIRESTORE_DB"] = db
+
 app.before_request(before_request)
 app.register_blueprint(user_blueprint, url_prefix="/user")
 

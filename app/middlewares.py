@@ -20,3 +20,5 @@ def before_request():
         g.token = decoded_token
     else:
         g.token = {}
+
+
