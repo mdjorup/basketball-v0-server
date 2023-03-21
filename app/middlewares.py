@@ -1,3 +1,5 @@
+from functools import wraps
+
 from firebase_admin import auth
 from flask import g, request
 
@@ -17,8 +19,29 @@ def before_request():
         except Exception:
             decoded_token = {}
         # now use the token to create a user object
-        g.token = decoded_token
+        g.decoded_token = decoded_token
     else:
-        g.token = {}
+        g.decoded_token = {}
+
+
+def authorized_roles(roles_list):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            
+            user_role = g.get('decoded_token', {}).get('role')
+            if user_role not in roles_list:
+                return {'message': 'Unauthorized access.'}, 401
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
+
+
+def require_login(func):
+    def wrapper(*args, **kwargs):
+        if not g.get('decoded_token', {}):
+            return {'message': 'Unauthorized access.'}, 401
+        return func(*args, **kwargs)
+    return wrapper
 
 
