@@ -120,7 +120,7 @@ def get_user_me():
     else:
         return "Error", 500
     
-    
+
 @user_blueprint.errorhandler(EmailAlreadyExistsError)
 def handle_email_already_exists(error):
     return error, 409
@@ -136,3 +136,4 @@ def handle_not_found(error):
 @user_blueprint.errorhandler(Exception)
 def handle_exception(error):
     return error, 500
+    

@@ -4,7 +4,6 @@ from datetime import datetime, timezone
 from firebase_admin import auth
 from firebase_admin.exceptions import NotFoundError
 
-from app import app
 from app.database import get_db
 from app.models.user_model import User, UserRole
 from app.services.exceptions import UserCreationFailedError

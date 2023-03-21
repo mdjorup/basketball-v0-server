@@ -37,6 +37,7 @@ def authorized_roles(roles_list):
 
 
 def require_login(func):
+    @wraps(func)
     def wrapper(*args, **kwargs):
         if not g.get('decoded_token', {}):
             return {'message': 'Unauthorized access.'}, 401
