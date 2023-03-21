@@ -1,10 +1,13 @@
 
 from dataclasses import asdict
 
+from firebase_admin.auth import EmailAlreadyExistsError
+from firebase_admin.exceptions import NotFoundError
 from flask import Blueprint, g, request
 
 from app.middlewares import authorized_roles, require_login
 from app.models.user_model import User, UserRole
+from app.services.exceptions import UserCreationFailedError
 from app.services.user_service import UserService
 
 user_blueprint = Blueprint("user", __name__)
@@ -66,8 +69,7 @@ def update_user_by_id(uid : str):
     else : 
         return "Error", 500
     
-    print(request_json)
-    user : User | None = user_service.get_user(uid)
+    user : User = user_service.get_user(uid)
     if not user:
         return "Error", 500
     
@@ -84,6 +86,8 @@ def update_user_by_id(uid : str):
 @user_blueprint.route("/<uid>", methods=["DELETE"])
 @require_login
 def delete_user_by_id(uid : str):
+
+    # Validate access
     user_token_uid : str = g.decoded_token.get("uid")
     if g.decoded_token.get("role") == "admin":
         pass
@@ -93,6 +97,7 @@ def delete_user_by_id(uid : str):
         return "Error", 400
     
     user_service = UserService()
+
     if user_service.delete_user(uid):
         return "Success", 200
     else:
@@ -106,9 +111,28 @@ def get_user_me():
     uid : str = g.decoded_token.get("uid")
     if not uid:
         return "Error", 500
+    
     user_service = UserService()
-    user : User | None = user_service.get_user(uid)
+
+    user : User = user_service.get_user(uid)
     if user:
         return asdict(user), 200
     else:
         return "Error", 500
+    
+    
+@user_blueprint.errorhandler(EmailAlreadyExistsError)
+def handle_email_already_exists(error):
+    return error, 409
+
+@user_blueprint.errorhandler(UserCreationFailedError)
+def handle_user_creation_failed(error):
+    return error, 500
+
+@user_blueprint.errorhandler(NotFoundError)
+def handle_not_found(error):
+    return error, 404
+
+@user_blueprint.errorhandler(Exception)
+def handle_exception(error):
+    return error, 500
