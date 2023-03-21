@@ -1,8 +1,6 @@
 
 from flask import Blueprint, g, request
 
-from app.database import get_db
-
 user_blueprint = Blueprint("user", __name__)
 
 @user_blueprint.route("/", methods=["GET"])
@@ -12,8 +10,6 @@ def index():
 
 @user_blueprint.route("/", methods=["POST"])
 def users():
-
-    db = get_db()
 
     if request.method == "POST":
         data : dict = request.get_json()

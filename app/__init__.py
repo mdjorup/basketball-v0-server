@@ -5,7 +5,7 @@ from flask_cors import CORS
 
 from app.config import firebase_credentials, origins
 from app.middlewares import before_request
-from app.routes.user import user_blueprint
+from app.routes.user_routes import user_blueprint
 
 load_dotenv()
 
