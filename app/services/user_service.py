@@ -8,14 +8,14 @@ class UserService:
         self.db = get_db()
 
     
-    def create_user(self, uid : str, name : str, email : str, password : str, role : UserRole) -> User:
+    def create_user(self, uid : str, name : str, email : str, password : str, role : UserRole) -> User | None:
         pass
 
-    def get_user(self, uid : str) -> User:
+    def get_user(self, uid : str) -> User | None:
 
         pass
 
-    def update_user(self, user : User) -> None:
+    def update_user(self, user : User) -> bool:
         # updating a user should involve first loading the user using the get_user method in order to pass a User object
 
         pass
