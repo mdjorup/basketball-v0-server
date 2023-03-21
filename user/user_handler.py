@@ -12,10 +12,10 @@ def create_user(auth, db, data: dict):
         email : str = data["email"]
         password : str = data["password"]
         role_value : str = data.get("role", "standard")
-        if role_value in get_args(UserRole):
+        if role_value in get_args(UserRole) and role_value != "admin":
             user : UserRecord = auth.create_user(email=email, password=password)
             auth.set_custom_user_claims(user.uid, {"role": role_value})
-            db.collection("users").add({
+            db.collection("users").document(user.uid).set({
                 "email" : email,
                 "password" : password,
                 "role" : role_value
@@ -25,7 +25,6 @@ def create_user(auth, db, data: dict):
         
         return {"message": f"User {user.uid} with email {user.email} successfully created"}, 201
         
-            
     except KeyError as ke:
         return {"error": f"Missing key: {ke}"}, 400
     except Exception as e:
