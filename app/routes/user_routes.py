@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from flask import Blueprint, Response, g, request
 
 from app.middlewares import authorized_roles, require_login
-from app.models.user_model import User
+from app.models.user_model import User, UserRole
 from app.services.user_service import UserService
 
 user_blueprint = Blueprint("user", __name__)
@@ -13,9 +13,18 @@ user_blueprint = Blueprint("user", __name__)
 @user_blueprint.route("/", methods=["POST"])
 def create_new_user():
 
+    if not request.is_json:
+        return "Error", 400
+    
+    request_json : dict = request.get_json()
+    name : str = request_json["name"]
+    email : str = request_json["email"]
+    password : str = request_json["password"]
+    role : UserRole = request_json["role"]
+    
     user_service = UserService()
 
-    new_user : User | None = user_service.create_user("Blank", "blank.djorup@gmail.com", "password", "standard")
+    new_user : User | None = user_service.create_user(name=name, email=email, password=password, role=role)
     if new_user:   
         return asdict(new_user), 201
     else:
