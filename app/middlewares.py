@@ -28,7 +28,6 @@ def authorized_roles(roles_list):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            
             user_role = g.get('decoded_token', {}).get('role')
             if user_role not in roles_list:
                 return {'message': 'Unauthorized access.'}, 401

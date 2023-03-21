@@ -1,8 +1,7 @@
 
 from dataclasses import asdict
-from datetime import datetime, timezone
 
-from flask import Blueprint, Response, g, request
+from flask import Blueprint, g, request
 
 from app.middlewares import authorized_roles, require_login
 from app.models.user_model import User, UserRole
@@ -21,6 +20,9 @@ def create_new_user():
     email : str = request_json["email"]
     password : str = request_json["password"]
     role : UserRole = request_json["role"]
+
+    if role == "admin": # can't create admin users
+        return "Error", 400
     
     user_service = UserService()
 
@@ -47,6 +49,16 @@ def get_user_by_id(uid : str):
 @require_login
 def update_user_by_id(uid : str):
     
+    
+    # Vadidate that the user being updated is the same as the one in the token
+    user_token_uid : str = g.decoded_token.get("uid")
+    if g.decoded_token.get("role") == "admin":
+        pass
+    elif not user_token_uid:
+        return "Error", 500
+    elif user_token_uid != uid: 
+        return "Error", 400
+    
     user_service = UserService()
     
     if request.is_json:
@@ -70,9 +82,16 @@ def update_user_by_id(uid : str):
 
 
 @user_blueprint.route("/<uid>", methods=["DELETE"])
-@authorized_roles(["admin"])
+@require_login
 def delete_user_by_id(uid : str):
-
+    user_token_uid : str = g.decoded_token.get("uid")
+    if g.decoded_token.get("role") == "admin":
+        pass
+    elif not user_token_uid:
+        return "Error", 500
+    elif user_token_uid != uid: # can't delete other users
+        return "Error", 400
+    
     user_service = UserService()
     if user_service.delete_user(uid):
         return "Success", 200
@@ -84,7 +103,9 @@ def delete_user_by_id(uid : str):
 @user_blueprint.route("/me", methods=["GET"])
 @require_login
 def get_user_me():
-    uid : str = g.decoded_token["uid"]
+    uid : str = g.decoded_token.get("uid")
+    if not uid:
+        return "Error", 500
     user_service = UserService()
     user : User | None = user_service.get_user(uid)
     if user:
