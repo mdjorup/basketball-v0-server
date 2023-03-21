@@ -18,19 +18,16 @@ class User:
     password: str 
     role: UserRole
     active : bool
-    created_at : datetime
-    updated_at : datetime
-    __updates : dict = field(default_factory=dict, init=False, repr=False, compare=False)
+    created_at : datetime # unix timestamp
+    updated_at : datetime # unix timestamp
 
-    def set_field(self, field : str, value : Any) -> None:
-        if not hasattr(self, field):
-            raise AttributeError(f"User object has no attribute {field}")
         
-        setattr(self, field, value)
-        self.__updates[field] = value
+
+
+
     
-    def get_updates(self) -> dict:
-        return self.__updates
+    
+
     
     
     
