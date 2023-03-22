@@ -1,6 +1,7 @@
 from functools import wraps
 
 from firebase_admin import auth
+from firebase_admin.exceptions import PermissionDeniedError
 from flask import g, request
 
 

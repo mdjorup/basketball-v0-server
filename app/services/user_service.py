@@ -5,8 +5,8 @@ from firebase_admin import auth
 from firebase_admin.exceptions import NotFoundError
 
 from app.database import get_db
+from app.exceptions import UserCreationFailedError
 from app.models.user_model import User, UserRole
-from app.services.exceptions import UserCreationFailedError
 
 
 class UserService:
