@@ -20,6 +20,7 @@ class User:
     active: bool
     created_at: datetime  # unix timestamp
     updated_at: datetime  # unix timestamp
+    organization_id: str = ""
 
     def __init__(self, **kwargs):
         # Filter out any keys that are not defined in the dataclass

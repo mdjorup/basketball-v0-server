@@ -33,7 +33,7 @@ def create_new_user():
     )
 
     return build_response(
-        asdict(new_user), 201, f"User {new_user.uid} created successfully"
+        {"user": asdict(new_user)}, 201, f"User {new_user.uid} created successfully"
     )
 
 
@@ -43,7 +43,7 @@ def get_user_by_id(uid: str):
 
     user: User = user_service.get_user(uid)
 
-    return build_response(asdict(user), 200, f"User {user.uid} retrieved successfully")
+    return build_response({"user": asdict(user)}, 200, f"User {user.uid} retrieved successfully")
 
 
 @user_blueprint.route("/<uid>", methods=["PUT"])
@@ -70,7 +70,7 @@ def update_user_by_id(uid: str):
 
     user_service.update_user(user)
 
-    return build_response(asdict(user), 200, f"User {user.uid} updated successfully")
+    return build_response({"user": asdict(user)}, 200, f"User {user.uid} updated successfully")
 
 
 @user_blueprint.route("/<uid>", methods=["DELETE"])
@@ -100,4 +100,4 @@ def get_user_me():
 
     user: User = user_service.get_user(uid)
 
-    return build_response(asdict(user), 200, f"User {user.uid} retrieved successfully")
+    return build_response({"user": asdict(user)}, 200, f"User {user.uid} retrieved successfully")
