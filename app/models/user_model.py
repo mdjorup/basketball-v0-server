@@ -20,7 +20,7 @@ class User:
     active: bool
     created_at: datetime  # unix timestamp
     updated_at: datetime  # unix timestamp
-    organization_id: str = ""
+    organization_ids: list[str] = field(default_factory=list)
 
     def __init__(self, **kwargs):
         # Filter out any keys that are not defined in the dataclass
