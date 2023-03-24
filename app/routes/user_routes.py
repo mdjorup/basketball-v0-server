@@ -9,6 +9,7 @@ from app.exceptions import (BadRequestError, ServerError,
                             UserCreationFailedError)
 from app.middlewares import require_login
 from app.models.user_model import User, UserRole
+from app.routes.responses import build_response
 from app.services.user_service import UserService
 
 user_blueprint = Blueprint("user", __name__)
@@ -33,7 +34,7 @@ def create_new_user():
 
     new_user : User = user_service.create_user(name=name, email=email, password=password, role=role)
 
-    return asdict(new_user), 201
+    return build_response(asdict(new_user), 201, f"User {new_user.uid} created successfully")
     
 
 
@@ -44,7 +45,7 @@ def get_user_by_id(uid : str):
 
     user : User = user_service.get_user(uid)
 
-    return asdict(user), 200
+    return build_response(asdict(user), 200, f"User {user.uid} retrieved successfully")
     
 
 
@@ -74,7 +75,7 @@ def update_user_by_id(uid : str):
 
     user_service.update_user(user)
     
-    return asdict(user), 200
+    return build_response(asdict(user), 200, f"User {user.uid} updated successfully")
     
 
 
@@ -92,8 +93,7 @@ def delete_user_by_id(uid : str):
     user_service = UserService()
 
     user_service.delete_user(uid)
-
-    return f"User {uid} successfully deleted", 200
+    return build_response({}, 200, f"User {uid} successfully deleted")
 
 
 
@@ -108,34 +108,7 @@ def get_user_me():
 
     user : User = user_service.get_user(uid)
     
-    return asdict(user), 200
+    return build_response(asdict(user), 200, f"User {user.uid} retrieved successfully")
     
 
-# @user_blueprint.errorhandler(EmailAlreadyExistsError)
-# def handle_email_already_exists(error):
-#     return error, 409
-
-# @user_blueprint.errorhandler(UserCreationFailedError)
-# def handle_user_creation_failed(error):
-#     return error, 500
-
-# @user_blueprint.errorhandler(NotFoundError)
-# def handle_not_found(error):
-#     return error, 404
-
-# @user_blueprint.errorhandler(PermissionDeniedError)
-# def handle_permission_denied(error):
-#     return error, 401
-
-# @user_blueprint.errorhandler(ServerError)
-# def handle_server_error(error):
-#     return error, 500
-
-# @user_blueprint.errorhandler(BadRequestError)
-# def handle_bad_request(error):
-#     return error, 400
-
-# @user_blueprint.errorhandler(Exception)
-# def handle_exception(error):
-#     return error, 500
     
