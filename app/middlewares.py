@@ -31,7 +31,7 @@ def authorized_roles(roles_list):
         def wrapper(*args, **kwargs):
             user_role = g.get('decoded_token', {}).get('role')
             if user_role not in roles_list:
-                return {'message': 'Unauthorized access.'}, 401
+                raise PermissionDeniedError("You are not authorized to perform this action.")
             return func(*args, **kwargs)
         return wrapper
     return decorator
@@ -41,7 +41,7 @@ def require_login(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         if not g.get('decoded_token', {}):
-            return {'message': 'Unauthorized access.'}, 401
+            raise PermissionDeniedError("You are not authorized to perform this action.")
         return func(*args, **kwargs)
     return wrapper
 
