@@ -20,7 +20,7 @@ class Model(ABC):
             object.__setattr__(self, k, v)
     
     @abstractmethod
-    def update_field(cls, key: str, value: Any) -> None:
+    def update_field(self, key: str, value: Any) -> None:
         pass
         
 
