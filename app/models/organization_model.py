@@ -8,13 +8,13 @@ from app.models.user_model import User
 
 @dataclass
 class Organization(Model):
-    id: str
+    organization_id: str
     name: str
 
     created_at: datetime
     updated_at: datetime
-    # players : List[Player] = field(default_factory = list)
-    # teams : List[Team] = field(default_factory = list)
+    #players : List[Player] = field(default_factory = list)
+    #teams : List[Team] = field(default_factory = list)
     coaches : List[User] = field(default_factory = list)
     
     
