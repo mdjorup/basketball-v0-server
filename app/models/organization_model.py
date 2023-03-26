@@ -18,9 +18,11 @@ class Organization(Model):
         name (str): The name of the organization.
         created_at (datetime): The date and time the organization was created.
         updated_at (datetime): The date and time the organization was last updated.
+        owner (str): The uid of the user that owns the organization
         players (list[Player], optional): A list of players in the organization. Defaults to an empty list.
+        active (bool, optional): Whether the organization is active. Defaults to True. 
         teams (list[Team], optional): A list of teams in the organization. Defaults to an empty list.
-        coaches (list[User], optional): A list of coaches in the organization. Defaults to an empty list.
+        coaches (list[str]], optional): A list of coaches in the organization. Defaults to an empty list.
     
     Methods:
         update_field(key: str, value: Any) -> None:
@@ -32,9 +34,11 @@ class Organization(Model):
     name: str
     created_at: datetime
     updated_at: datetime
-    players : List[Player] = field(default_factory = list)
-    teams : List[Team] = field(default_factory = list)
-    coaches : List[User] = field(default_factory = list)
+    owner : str # uid of person who owns it
+    active : bool = True
+    players : list[Player] = field(default_factory = list) # subcollection
+    teams : list[Team] = field(default_factory = list) # subcollection
+    coaches : list[str] = field(default_factory = list) # list of uids
     
     
 

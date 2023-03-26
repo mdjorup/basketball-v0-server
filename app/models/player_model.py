@@ -24,7 +24,6 @@ class Player(Model):
 
     Attributes:
         player_id (str): The unique identifier of the player.
-        organization_id (str): The identifier of the organization the player belongs to.
         first_name (str): The first name of the player.
         last_name (str): The last name of the player.
         team_ids (list[str], optional): A list of team IDs the player is associated with. Defaults to an empty list.
@@ -38,7 +37,6 @@ class Player(Model):
             If the key is not found in the class' annotations, an AttributeError is raised.
     """
     player_id: str
-    organization_id: str
     first_name: str
     last_name: str
     team_ids: list[str] = field(default_factory=list)

@@ -12,7 +12,6 @@ class Team(Model):
 
     Attributes:
         team_id (str): The unique identifier of the team.
-        organization_id (str): The identifier of the organization the team belongs to.
         name (str): The name of the team.
         wins (int, optional): The number of wins the team has. Defaults to 0.
         losses (int, optional): The number of losses the team has. Defaults to 0.
@@ -27,7 +26,6 @@ class Team(Model):
             If the key is not found in the class' annotations, an AttributeError is raised.
     """
     team_id: str
-    organization_id: str
     name: str
     wins: int = 0
     losses: int = 0
