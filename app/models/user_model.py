@@ -1,9 +1,10 @@
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, List, Literal
+from typing import Any, Literal
 
 from app.models.model import Model
 
+# TODO: Turn this into an ENUM Class
 UserRole = Literal["admin", "standard", "coach"]
 
 
