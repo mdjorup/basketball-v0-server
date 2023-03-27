@@ -1,7 +1,10 @@
-from dataclasses import MISSING, asdict, dataclass, field, fields
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, List, Literal
+from typing import Any, Literal
 
+from app.models.model import Model
+
+# TODO: Turn this into an ENUM Class
 UserRole = Literal["admin", "standard", "coach"]
 
 
@@ -12,7 +15,7 @@ UserRole = Literal["admin", "standard", "coach"]
 
 
 @dataclass
-class User:
+class User(Model):
     uid: str
     name: str
     email: str
@@ -20,25 +23,9 @@ class User:
     active: bool
     created_at: datetime  # unix timestamp
     updated_at: datetime  # unix timestamp
-    organization_ids: List[str] = field(default_factory = list)
+    organization_ids: list[str] = field(default_factory = list)
 
-    def __init__(self, **kwargs):
-        # Filter out any keys that are not defined in the dataclass
-
-        defaults = {
-            f.name: f.default_factory() for f in fields(self) if f.default_factory is not MISSING
-        }
-        
-        filtered_kwargs = {
-            k: v for k, v in kwargs.items() if k in self.__annotations__.keys()
-        }
-
-        merged_kwargs = {**defaults, **filtered_kwargs}
-
-        for k, v in merged_kwargs.items():
-            object.__setattr__(self, k, v)
-
-    def update_field(self, key: str, value: Any) -> bool:
+    def update_field(self, key: str, value: Any) -> None:
         if key not in self.__annotations__.keys():
             raise AttributeError("Attribute doesn't exist")
         elif (
@@ -47,4 +34,3 @@ class User:
             raise AttributeError(f"Unable to edit attribute {key}")
         object.__setattr__(self, key, value)
         self.updated_at = datetime.now(timezone.utc)
-        return True
