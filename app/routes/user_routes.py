@@ -9,7 +9,7 @@ from app.models.user_model import User, UserRole
 from app.routes.responses import build_response
 from app.services.user_service import UserService
 
-user_blueprint = Blueprint("user", __name__)
+user_blueprint = Blueprint("users", __name__)
 
 
 @user_blueprint.route("/", methods=["POST"])
@@ -43,7 +43,9 @@ def get_user_by_id(uid: str):
 
     user: User = user_service.get_user(uid)
 
-    return build_response({"user": asdict(user)}, 200, f"User {user.uid} retrieved successfully")
+    return build_response(
+        {"user": asdict(user)}, 200, f"User {user.uid} retrieved successfully"
+    )
 
 
 @user_blueprint.route("/<uid>", methods=["PUT"])
@@ -70,7 +72,9 @@ def update_user_by_id(uid: str):
 
     user_service.update_user(user)
 
-    return build_response({"user": asdict(user)}, 200, f"User {user.uid} updated successfully")
+    return build_response(
+        {"user": asdict(user)}, 200, f"User {user.uid} updated successfully"
+    )
 
 
 @user_blueprint.route("/<uid>", methods=["DELETE"])
@@ -100,4 +104,6 @@ def get_user_me():
 
     user: User = user_service.get_user(uid)
 
-    return build_response({"user": asdict(user)}, 200, f"User {user.uid} retrieved successfully")
+    return build_response(
+        {"user": asdict(user)}, 200, f"User {user.uid} retrieved successfully"
+    )

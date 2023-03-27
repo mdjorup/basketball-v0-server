@@ -9,6 +9,7 @@ class Position(Enum):
     """
     Enum representing the possible positions a basketball player can play.
     """
+
     POINT_GUARD = "PG"
     SHOOTING_GUARD = "SG"
     SMALL_FORWARD = "SF"
@@ -36,6 +37,7 @@ class Player(Model):
             Updates the value of an attribute in the class with the specified key.
             If the key is not found in the class' annotations, an AttributeError is raised.
     """
+
     player_id: str
     first_name: str
     last_name: str
@@ -56,7 +58,8 @@ class Player(Model):
             AttributeError: If the key is not found in the class' annotations.
         """
         if key not in self.__annotations__.keys():
-            raise AttributeError(f"Attribute {key} doesn't exist on {self.__class__.__name__}")
-        
+            raise AttributeError(
+                f"Attribute {key} doesn't exist on {self.__class__.__name__}"
+            )
+
         object.__setattr__(self, key, value)
-        

@@ -23,7 +23,7 @@ class User(Model):
     active: bool
     created_at: datetime  # unix timestamp
     updated_at: datetime  # unix timestamp
-    organization_ids: list[str] = field(default_factory = list)
+    organization_ids: list[str] = field(default_factory=list)
 
     def update_field(self, key: str, value: Any) -> None:
         if key not in self.__annotations__.keys():

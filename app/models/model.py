@@ -7,7 +7,9 @@ from typing import Any
 class Model(ABC):
     def __init__(self, **kwargs):
         defaults = {
-            f.name: f.default_factory() for f in fields(self) if f.default_factory is not MISSING
+            f.name: f.default_factory()
+            for f in fields(self)
+            if f.default_factory is not MISSING
         }
 
         filtered_kwargs = {
@@ -18,11 +20,7 @@ class Model(ABC):
 
         for k, v in merged_kwargs.items():
             object.__setattr__(self, k, v)
-    
+
     @abstractmethod
     def update_field(self, key: str, value: Any) -> None:
         pass
-        
-
-        
-

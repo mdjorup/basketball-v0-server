@@ -117,4 +117,3 @@ class UserService:
         user: User = User(**data)
         user.update_field("active", False)
         doc_ref.set(asdict(user))
-
