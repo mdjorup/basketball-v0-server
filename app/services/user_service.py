@@ -20,7 +20,7 @@ class UserService(Service):
 
 
     def _create(self, model: User) -> None:
-        self.db.collection("users").document(model.uid).set(model.__dict__)
+        self.db.collection("users").document(model.uid).set(model.__dict__())
 
 
     def _read(self, id: str) -> User:

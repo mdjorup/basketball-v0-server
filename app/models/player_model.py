@@ -46,6 +46,10 @@ class Player(Model):
     weight: float | None = None
     position: Position = Position.NA
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        
+
     def update_field(self, key: str, value: Any) -> None:
         """
         Updates the value of an attribute in the class with the specified key.

@@ -34,6 +34,9 @@ class Team(Model):
     player_ids: list[str] = field(default_factory=list)
     game_ids: list[str] = field(default_factory=list)
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
     def update_field(self, key: str, value: Any) -> None:
         """
         Updates the value of an attribute in the class with the specified key.
