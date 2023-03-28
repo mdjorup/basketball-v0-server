@@ -1,5 +1,6 @@
 from dataclasses import asdict
 from datetime import datetime, timezone
+from typing import Any
 
 from firebase_admin import auth
 from firebase_admin.exceptions import NotFoundError
@@ -11,9 +12,16 @@ from app.services.service import Service
 
 class UserService(Service):
 
+    def __init__(self, operating_uid="", admin=False) -> None:
+        super().__init__()
+
+        self.operating_uid : str = operating_uid
+        self.admin : bool = admin
+
 
     def __create(self, model: User) -> None:
         self.db.collection("users").document(model.uid).set(model.__dict__)
+
 
     def __read(self, id: str) -> User:
         doc_ref = self.db.collection("users").document(id)
@@ -22,32 +30,22 @@ class UserService(Service):
             raise NotFoundError("User not found")
         data = doc.to_dict()
         user = User(**data)
+        if not user.active:
+            raise NotFoundError("User not found")
         return user
     
+
     def __update(self, model: User) -> None:
         self.db.collection("users").document(model.uid).set(model.changes)
     
+
     def __delete(self, model: User) -> None:
         self.db.collection("users").document(model.uid).delete()
 
     
 
     def create_user(self, name: str, email: str, password: str, role: UserRole) -> User:
-        """
-        Creates a new user in Firebase Authentication and saves their details to the database.
-
-        Args:
-            name (str): The name of the user.
-            email (str): The email address of the user.
-            password (str): The password for the user's account.
-            role (UserRole): The role of the user.
-
-        Raises:
-            UserCreationFailedError: If the user creation process fails.
-
-        Returns:
-            User: The user object representing the created user.
-        """
+        
         firebase_user = auth.create_user(email=email, password=password)
 
         if not firebase_user:
@@ -63,67 +61,43 @@ class UserService(Service):
             role=role,
         )
 
-        self.db.collection("users").document(uid).set(user.__dict__)
+        self.__create(user)
 
         return user
+
 
     def get_user(self, uid: str) -> User:
-        """
-        Retrieves a user from the database using their unique identifier.
+        
+        return self.__read(uid)
 
-        Args:
-            uid (str): The unique identifier of the user.
 
-        Raises:
-            NotFoundError: If a user with the specified identifier cannot be found in the database.
+    def update_user(self, uid: str, updates : dict[str, Any]) -> User:
+        
 
-        Returns:
-            User: The user object representing the retrieved user.
-        """
-        doc_ref = self.db.collection("users").document(uid)
-        doc = doc_ref.get()
-        if not doc.exists:
-            raise NotFoundError(f"User {uid} not found")
-        data = doc.to_dict()
-        user: User = User(**data)
+        if uid != self.operating_uid and not self.admin:
+            raise PermissionError("You do not have permission to perform this action.")
+        
+        user: User = self.__read(uid)
+        
+        for key, value in updates:
+            user.update_field(key, value)
+        
+        self.__update(user)
+        
         return user
 
-    def update_user(self, user: User) -> None:
-        """
-        Updates the details of an existing user in the database.
-
-        Args:
-            user (User): The user object representing the updated user.
-
-        Raises:
-            NotFoundError: If the user with the specified identifier cannot be found in the database.
-
-        Returns:
-            None.
-        """
-        uid = user.uid
-        doc_ref = self.db.collection("users").document(uid).set(asdict(user))
 
     def delete_user(self, uid: str) -> None:
-        """
-        Soft-deletes an existing user in the database by setting their 'active' field to False.
+        
+        if uid != self.operating_uid and not self.admin:
+            raise PermissionError("You do not have permission to perform this action.")
 
-        Args:
-            uid (str): The unique identifier of the user to be deleted.
-
-        Raises:
-            NotFoundError: If the user with the specified identifier cannot be found in the database.
-
-        Returns:
-            None.
-        """
-        doc_ref = self.db.collection("users").document(uid)
-        doc = doc_ref.get()
-
-        if not doc.exists:
-            raise NotFoundError(f"User {uid} not found")
-
-        data = doc.to_dict()
-        user: User = User(**data)
-        user.update_field("active", False)
-        doc_ref.set(asdict(user))
+        user: User = self.__read(uid)
+        
+        user.delete(caller_uid=self.operating_uid, admin=self.admin)
+        
+        self.__update(user)
+        
+        
+        
+        
