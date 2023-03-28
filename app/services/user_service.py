@@ -4,14 +4,33 @@ from datetime import datetime, timezone
 from firebase_admin import auth
 from firebase_admin.exceptions import NotFoundError
 
-from app.database import get_db
 from app.exceptions import UserCreationFailedError
 from app.models.user_model import User, UserRole
+from app.services.service import Service
 
 
-class UserService:
-    def __init__(self):
-        self.db = get_db()
+class UserService(Service):
+
+
+    def __create(self, model: User) -> None:
+        self.db.collection("users").document(model.uid).set(model.__dict__)
+
+    def __read(self, id: str) -> User:
+        doc_ref = self.db.collection("users").document(id)
+        doc = doc_ref.get()
+        if not doc.exists():
+            raise NotFoundError("User not found")
+        data = doc.to_dict()
+        user = User(**data)
+        return user
+    
+    def __update(self, model: User) -> None:
+        self.db.collection("users").document(model.uid).set(model.changes)
+    
+    def __delete(self, model: User) -> None:
+        self.db.collection("users").document(model.uid).delete()
+
+    
 
     def create_user(self, name: str, email: str, password: str, role: UserRole) -> User:
         """
@@ -37,18 +56,14 @@ class UserService:
         uid: str = firebase_user.uid
 
         auth.set_custom_user_claims(uid, {"role": role})
-        current_time: datetime = datetime.now(timezone.utc)
         user: User = User(
             uid=uid,
             name=name,
             email=email,
             role=role,
-            active=True,
-            created_at=current_time,
-            updated_at=current_time,
         )
 
-        self.db.collection("users").document(uid).set(asdict(user))
+        self.db.collection("users").document(uid).set(user.__dict__)
 
         return user
 
@@ -87,12 +102,7 @@ class UserService:
             None.
         """
         uid = user.uid
-        doc_ref = self.db.collection("users").document(uid)
-        doc = doc_ref.get()
-        if not doc.exists:
-            raise NotFoundError(f"User {uid} not found")
-
-        doc_ref.set(asdict(user))
+        doc_ref = self.db.collection("users").document(uid).set(asdict(user))
 
     def delete_user(self, uid: str) -> None:
         """

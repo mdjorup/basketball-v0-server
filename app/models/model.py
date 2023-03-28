@@ -1,11 +1,14 @@
-from abc import ABC, abstractmethod
-from dataclasses import MISSING, dataclass, fields
+from abc import ABC
+from dataclasses import MISSING, asdict, dataclass, fields
 from typing import Any
 
 
 @dataclass
-class Model(ABC):
-    def __init__(self, **kwargs):
+class Model:
+    
+    changes: dict[str, Any]
+
+    def __init__(self, **kwargs) -> None:
         defaults = {
             f.name: f.default_factory()
             for f in fields(self)
@@ -21,6 +24,14 @@ class Model(ABC):
         for k, v in merged_kwargs.items():
             object.__setattr__(self, k, v)
 
-    @abstractmethod
+    def __dict__(self) -> dict[str, Any]:
+        dict_self = asdict(self)
+        dict_self.pop("changes")
+        return dict_self
+
+
     def update_field(self, key: str, value: Any) -> None:
-        pass
+        if key not in self.__annotations__.keys():
+            raise AttributeError("Attribute doesn't exist")
+        self.changes[key] = value
+        object.__setattr__(self, key, value)
