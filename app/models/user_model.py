@@ -36,6 +36,7 @@ class User(Model):
         super().update_field(key, value)
         self.updated_at = datetime.now(timezone.utc)
 
+
     def delete(self, caller_uid="", admin=False):
         if caller_uid != self.uid and not admin:
             raise AttributeError("Unable to delete user")

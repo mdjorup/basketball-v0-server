@@ -1,5 +1,3 @@
-from dataclasses import asdict
-
 from firebase_admin.exceptions import PermissionDeniedError
 from flask import Blueprint, g, request
 
@@ -34,7 +32,7 @@ def create_new_user():
     )
 
     return build_response(
-        {"user": new_user.__dict__}, 201, f"User {new_user.uid} created successfully"
+        new_user.__dict__(), 201, f"User {new_user.uid} created successfully"
     )
 
 
@@ -45,7 +43,7 @@ def get_user_by_id(uid: str):
     user: User = user_service.get_user(uid)
 
     return build_response(
-        {"user": user.__dict__}, 200, f"User {user.uid} retrieved successfully"
+        user.__dict__(), 200, f"User {user.uid} retrieved successfully"
     )
 
 
@@ -67,7 +65,7 @@ def update_user_by_id(uid: str):
     user: User = user_service.update_user(uid, request_json)
     
     return build_response(
-        {"user": user.__dict__}, 200, f"User {user.uid} updated successfully"
+        user.__dict__(), 200, f"User {user.uid} updated successfully"
     )
 
 
@@ -98,5 +96,5 @@ def get_user_me():
     user: User = user_service.get_user(uid)
 
     return build_response(
-        {"user": user.__dict__}, 200, f"User {user.uid} retrieved successfully"
+        user.__dict__(), 200, f"User {user.uid} retrieved successfully"
     )

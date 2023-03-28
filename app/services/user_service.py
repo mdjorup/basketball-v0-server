@@ -19,14 +19,14 @@ class UserService(Service):
         self.admin : bool = admin
 
 
-    def __create(self, model: User) -> None:
+    def _create(self, model: User) -> None:
         self.db.collection("users").document(model.uid).set(model.__dict__)
 
 
-    def __read(self, id: str) -> User:
+    def _read(self, id: str) -> User:
         doc_ref = self.db.collection("users").document(id)
         doc = doc_ref.get()
-        if not doc.exists():
+        if not doc.exists:
             raise NotFoundError("User not found")
         data = doc.to_dict()
         user = User(**data)
@@ -35,11 +35,11 @@ class UserService(Service):
         return user
     
 
-    def __update(self, model: User) -> None:
-        self.db.collection("users").document(model.uid).set(model.changes)
+    def _update(self, model: User) -> None:
+        self.db.collection("users").document(model.uid).update(model.changes)
     
 
-    def __delete(self, model: User) -> None:
+    def _delete(self, model: User) -> None:
         self.db.collection("users").document(model.uid).delete()
 
     
@@ -61,14 +61,13 @@ class UserService(Service):
             role=role,
         )
 
-        self.__create(user)
+        self._create(user)
 
         return user
 
 
     def get_user(self, uid: str) -> User:
-        
-        return self.__read(uid)
+        return self._read(uid)
 
 
     def update_user(self, uid: str, updates : dict[str, Any]) -> User:
@@ -77,12 +76,12 @@ class UserService(Service):
         if uid != self.operating_uid and not self.admin:
             raise PermissionError("You do not have permission to perform this action.")
         
-        user: User = self.__read(uid)
+        user: User = self._read(uid)
         
         for key, value in updates:
             user.update_field(key, value)
         
-        self.__update(user)
+        self._update(user)
         
         return user
 
@@ -92,11 +91,11 @@ class UserService(Service):
         if uid != self.operating_uid and not self.admin:
             raise PermissionError("You do not have permission to perform this action.")
 
-        user: User = self.__read(uid)
+        user: User = self._read(uid)
         
         user.delete(caller_uid=self.operating_uid, admin=self.admin)
         
-        self.__update(user)
+        self._update(user)
         
         
         

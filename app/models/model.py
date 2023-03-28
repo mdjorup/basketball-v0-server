@@ -23,6 +23,7 @@ class Model:
 
         for k, v in merged_kwargs.items():
             object.__setattr__(self, k, v)
+        self.changes = {}
 
     def __dict__(self) -> dict[str, Any]:
         dict_self = asdict(self)

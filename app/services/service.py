@@ -11,17 +11,17 @@ class Service(ABC):
     # abstract methods don't do any validation. They just do what they are told
     # 
     @abstractmethod
-    def __create(self, model : Model) -> None:
+    def _create(self, model : Model) -> None:
         pass
 
     @abstractmethod
-    def __read(self, id : str) -> Model:
+    def _read(self, id : str) -> Model:
         pass
 
     @abstractmethod
-    def __update(self, model : Model) -> None:
+    def _update(self, model : Model) -> None:
         pass
 
     @abstractmethod
-    def __delete(self, model : Model) -> None:
+    def _delete(self, model : Model) -> None:
         pass

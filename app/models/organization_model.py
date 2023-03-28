@@ -2,6 +2,8 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, List
 
+from google.cloud import firestore
+
 from app.models.model import Model
 from app.models.player_model import Player
 from app.models.team_model import Team
@@ -41,6 +43,9 @@ class Organization(Model):
     teams: list[Team] = field(default_factory=list)  # subcollection
     coaches: list[str] = field(default_factory=list)  # list of uids
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
     def update_field(self, key: str, value: Any) -> None:
         """
         Updates the value of an attribute in the class with the specified key.
@@ -56,5 +61,21 @@ class Organization(Model):
             raise AttributeError(
                 f"Attribute {key} doesn't exist on {self.__class__.__name__}"
             )
+        super().update_field(key, value)
+        super().update_field("updated_at", datetime.now(timezone.utc))
+    
+    def add_coach(self, coach_uid: str) -> None:
+        """
+        Adds a coach to the organization.
 
-        object.__setattr__(self, key, value)
+        Args:
+            coach_uid (str): The uid of the coach to be added.
+        """
+        if coach_uid in self.coaches:
+            return
+        
+        self.coaches.append(coach_uid)
+        self.changes["coaches"] = firestore.ArrayUnion([coach_uid])
+        super().update_field("updated_at", datetime.now(timezone.utc))
+        
+        
