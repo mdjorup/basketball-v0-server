@@ -6,7 +6,9 @@ from firebase_admin.exceptions import NotFoundError
 from app.models.organization_model import Organization
 from app.models.player_model import Player
 from app.models.team_model import Team
+from app.models.user_model import User
 from app.services.service import Service
+from app.services.user_service import UserService
 
 
 class OrganizationService(Service):
@@ -80,7 +82,7 @@ class OrganizationService(Service):
         self._create(organization)
         return organization
     
-    def delete_organization(self, organization_id) -> None:
+    def delete_organization(self, organization_id : str) -> None:
         organization = self._read(organization_id)
 
         if organization.owner != self.operating_uid and not self.admin:
@@ -91,6 +93,15 @@ class OrganizationService(Service):
         organization.delete()
         
         self._update(organization)
+
+    
+    def get_organization_coaches(self, organization_id: str) -> list[User]:
+        organization = self._read(organization_id)
+        coach_ids : list[str] = organization.coaches
+
+        user_service = UserService()
+        coaches : list[User] = user_service.get_users_by_ids(coach_ids)
+        return coaches
 
     
     

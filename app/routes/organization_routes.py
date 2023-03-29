@@ -5,6 +5,7 @@ from flask import Blueprint, g, request
 from app.exceptions import BadRequestError
 from app.middlewares import authorized_roles
 from app.models.organization_model import Organization
+from app.models.user_model import User
 from app.routes.responses import build_response
 from app.services.organization_service import OrganizationService
 
@@ -52,12 +53,16 @@ def delete_organization_by_id(organization_id: str):
     return build_response({}, 204, f"Organization {organization_id} deleted successfully")
     
     
-# @organization_blueprint.route("/<organization_id>/coaches", methods=["GET"])
-# def get_coaches_from_organization(organization_id: str):
-#     organization_service = OrganizationService()
-#     organization = organization_service.get_organization_metadata(organization_id)
-#     if not organization:
-#         raise BadRequestError("Organization does not exist")
+@organization_blueprint.route("/<organization_id>/coaches", methods=["GET"])
+def get_coaches_from_organization(organization_id: str):
+    organization_service = OrganizationService()
+    
+    coaches : list[User] = organization_service.get_organization_coaches(organization_id)
+    coaches_json = [coach.__dict__() for coach in coaches]
+    
+    
+    return build_response({"coaches": coaches_json}, 200, "Coaches retrieved successfully")
+    
     
     
     

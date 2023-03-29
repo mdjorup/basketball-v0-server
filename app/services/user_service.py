@@ -96,6 +96,15 @@ class UserService(Service):
         user.delete()
         
         self._update(user)
+    
+    
+    def get_users_by_ids(self, uids : list[str]) -> list[User]:
+
+        collection_ref = self.db.collection("users")
+        docs = collection_ref.where("uid", "in", uids).where("active", "==", True).stream()
+        
+        users : list[User] = [User(**doc.to_dict()) for doc in docs]
+        return users
         
         
         
