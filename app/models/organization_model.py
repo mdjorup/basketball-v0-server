@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, List
+from typing import Any
 
 from google.cloud import firestore
 
@@ -35,9 +35,9 @@ class Organization(Model):
 
     organization_id: str
     name: str
-    created_at: datetime
-    updated_at: datetime
     owner: str  # uid of person who owns it
+    created_at: datetime = datetime.now(tz=timezone.utc)
+    updated_at: datetime = datetime.now(tz=timezone.utc)
     active: bool = True
     players: list[Player] = field(default_factory=list)  # subcollection
     teams: list[Team] = field(default_factory=list)  # subcollection
@@ -63,6 +63,12 @@ class Organization(Model):
             )
         super().update_field(key, value)
         super().update_field("updated_at", datetime.now(timezone.utc))
+
+    def delete(self):
+        """
+        Deletes the organization.
+        """
+        self.update_field("active", False)
     
     def add_coach(self, coach_uid: str) -> None:
         """

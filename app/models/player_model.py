@@ -41,6 +41,7 @@ class Player(Model):
     player_id: str
     first_name: str
     last_name: str
+    active: bool = True
     team_ids: list[str] = field(default_factory=list)
     height: float | None = None
     weight: float | None = None

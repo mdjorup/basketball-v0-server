@@ -27,6 +27,7 @@ class Team(Model):
 
     team_id: str
     name: str
+    active: bool = True
     wins: int = 0
     losses: int = 0
     ties: int = 0

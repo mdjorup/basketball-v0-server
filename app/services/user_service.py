@@ -93,7 +93,7 @@ class UserService(Service):
 
         user: User = self._read(uid)
         
-        user.delete(caller_uid=self.operating_uid, admin=self.admin)
+        user.delete()
         
         self._update(user)
         
