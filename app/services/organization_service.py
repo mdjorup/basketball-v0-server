@@ -82,6 +82,9 @@ class OrganizationService(Service):
         self._create(organization)
         return organization
     
+    def get_organization(self, organization_id: str) -> Organization:
+        return self._read(organization_id)
+    
     def delete_organization(self, organization_id : str) -> None:
         organization = self._read(organization_id)
 

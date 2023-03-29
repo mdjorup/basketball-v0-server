@@ -46,6 +46,12 @@ class Organization(Model):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+    def __dict__(self) -> dict[str, Any]:
+        super_dict = super().__dict__()
+        super_dict.pop("players")
+        super_dict.pop("teams")
+        return super_dict
+
     def update_field(self, key: str, value: Any) -> None:
         """
         Updates the value of an attribute in the class with the specified key.

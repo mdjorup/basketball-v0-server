@@ -40,6 +40,13 @@ def create_new_organization():
     return build_response({"organization": new_organization.__dict__()}, 201, "Organization created successfully")
 
 
+@organization_blueprint.route("/<organization_id>", methods=["GET"])
+def get_organization_by_id(organization_id: str):
+    organization_service = OrganizationService()
+    organization: Organization = organization_service.get_organization(organization_id)
+    return build_response({"organization": organization.__dict__()}, 200, "Organization retrieved successfully")
+
+
 @organization_blueprint.route("/<organization_id>", methods=["DELETE"])
 @authorized_roles(["coach", "admin"])
 def delete_organization_by_id(organization_id: str):

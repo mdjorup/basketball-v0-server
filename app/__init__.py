@@ -37,6 +37,7 @@ app.config["FIRESTORE_DB"] = db
 
 
 
+app.before_request(before_request)
 app.register_error_handler(auth.EmailAlreadyExistsError, handle_email_already_exists)
 app.register_error_handler(UserCreationFailedError, handle_user_creation_failed)
 app.register_error_handler(NotFoundError, handle_not_found)
@@ -45,7 +46,6 @@ app.register_error_handler(ServerError, handle_server_error)
 app.register_error_handler(BadRequestError, handle_bad_request)
 app.register_error_handler(Exception, handle_exception)
 app.register_error_handler(404, handle_not_found)
-app.before_request(before_request)
 app.register_blueprint(user_blueprint, url_prefix="/users")
 app.register_blueprint(game_blueprint, url_prefix="/games")
 app.register_blueprint(league_blueprint, url_prefix="/leagues")
