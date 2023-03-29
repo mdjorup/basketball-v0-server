@@ -83,5 +83,14 @@ class Organization(Model):
         self.coaches.append(coach_uid)
         self.changes["coaches"] = firestore.ArrayUnion([coach_uid])
         super().update_field("updated_at", datetime.now(timezone.utc))
+
+    def remove_coach(self, coach_uid: str) -> None:
+        
+        if coach_uid not in self.coaches:
+            return
+        
+        self.coaches.remove(coach_uid)
+        self.changes["coaches"] = firestore.ArrayRemove([coach_uid])
+        super().update_field("updated_at", datetime.now(timezone.utc))
         
         

@@ -32,7 +32,7 @@ def create_new_user():
     )
 
     return build_response(
-        new_user.__dict__(), 201, f"User {new_user.uid} created successfully"
+        {"user": new_user.__dict__()}, 201, f"User {new_user.uid} created successfully"
     )
 
 
@@ -43,7 +43,7 @@ def get_user_by_id(uid: str):
     user: User = user_service.get_user(uid)
 
     return build_response(
-        user.__dict__(), 200, f"User {user.uid} retrieved successfully"
+        {"user": user.__dict__()}, 200, f"User {user.uid} retrieved successfully"
     )
 
 
@@ -65,7 +65,7 @@ def update_user_by_id(uid: str):
     user: User = user_service.update_user(uid, request_json)
     
     return build_response(
-        user.__dict__(), 200, f"User {user.uid} updated successfully"
+        {"user": user.__dict__()}, 200, f"User {user.uid} updated successfully"
     )
 
 
@@ -96,5 +96,5 @@ def get_user_me():
     user: User = user_service.get_user(uid)
 
     return build_response(
-        user.__dict__(), 200, f"User {user.uid} retrieved successfully"
+        {"user": user.__dict__()}, 200, f"User {user.uid} retrieved successfully"
     )

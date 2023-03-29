@@ -102,6 +102,60 @@ class OrganizationService(Service):
         user_service = UserService()
         coaches : list[User] = user_service.get_users_by_ids(coach_ids)
         return coaches
+    
+
+    def add_user_to_organization(self, organization_id: str, user_id: str) -> None:
+        organization = self._read(organization_id)
+        if organization.owner != self.operating_uid and not self.admin:
+            raise PermissionError("You do not have permission to add a user to this organization")
+        elif organization.active == False:
+            raise NotFoundError("Organization not found")
+        elif user_id in organization.coaches:
+            raise ValueError("User is already a coach")
+
+        user_service = UserService()
+        user = user_service.get_user(user_id)
+        if user.active == False:
+            raise NotFoundError("User not found")
+        elif user.role != "coach":
+            raise ValueError("User is not a coach")
+        
+        organization.add_coach(user.uid)
+
+        self._update(organization)
+
+    
+    def remove_user_from_organization(self, organization_id: str, user_id: str) -> None:
+        
+        organization = self._read(organization_id)
+        
+        if organization.owner != self.operating_uid and not self.admin:
+            raise PermissionError("You do not have permission to remove a user from this organization")
+        elif organization.active == False:
+            raise NotFoundError("Organization not found")
+        elif user_id not in organization.coaches:
+            raise ValueError("User is not a coach")
+        elif user_id == organization.owner:
+            raise ValueError("You cannot remove the owner from the organization")
+        
+        organization.remove_coach(user_id)
+        self._update(organization)
+
+    
+    def transfer_organization_ownership(self, organization_id: str, user_id: str) -> None:
+        organization = self._read(organization_id)
+        
+        if organization.owner != self.operating_uid and not self.admin:
+            raise PermissionError("You do not have permission to transfer ownership of this organization")
+        elif organization.active == False:
+            raise NotFoundError("Organization not found")
+        elif user_id not in organization.coaches:
+            raise ValueError("User is not a coach")
+        
+        organization.update_field("owner", user_id)
+        
+        self._update(organization)
+        
 
     
     
