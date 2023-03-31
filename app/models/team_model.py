@@ -1,4 +1,3 @@
-
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -25,14 +24,19 @@ class Team(Model):
             Updates the value of an attribute in the class with the specified key.
             If the key is not found in the class' annotations, an AttributeError is raised.
     """
+
     team_id: str
     name: str
+    active: bool = True
     wins: int = 0
     losses: int = 0
     ties: int = 0
     league_id: str = ""
     player_ids: list[str] = field(default_factory=list)
     game_ids: list[str] = field(default_factory=list)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     def update_field(self, key: str, value: Any) -> None:
         """
@@ -46,6 +50,8 @@ class Team(Model):
             AttributeError: If the key is not found in the class' annotations.
         """
         if key not in self.__annotations__.keys():
-            raise AttributeError(f"Attribute {key} doesn't exist on {self.__class__.__name__}")
-        
+            raise AttributeError(
+                f"Attribute {key} doesn't exist on {self.__class__.__name__}"
+            )
+
         object.__setattr__(self, key, value)

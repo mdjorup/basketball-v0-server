@@ -10,6 +10,7 @@ class GameStatus(Enum):
     """
     Enum representing the status of a game.
     """
+
     UPCOMING = 0
     IN_PROGRESS = 1
     FINAL = 2
@@ -35,6 +36,7 @@ class Game(Model):
             Updates the value of an attribute in the class with the specified key.
             If the key is not found in the class' annotations, an AttributeError is raised.
     """
+
     game_id: str
     home_team_id: str
     away_team_id: str
@@ -42,9 +44,7 @@ class Game(Model):
     away_team_score: int
     game_time: datetime
     status: GameStatus = GameStatus.UPCOMING
-    league_id: str = "" # this is if this is a league game
-
-
+    league_id: str = ""  # this is if this is a league game
 
     def update_field(self, key: str, value: Any) -> None:
         """
@@ -58,6 +58,8 @@ class Game(Model):
             AttributeError: If the key is not found in the class' annotations.
         """
         if key not in self.__annotations__.keys():
-            raise AttributeError(f"Attribute {key} doesn't exist on {self.__class__.__name__}")
-        
+            raise AttributeError(
+                f"Attribute {key} doesn't exist on {self.__class__.__name__}"
+            )
+
         object.__setattr__(self, key, value)

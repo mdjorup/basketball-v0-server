@@ -1,34 +1,44 @@
 from dataclasses import asdict
 from datetime import datetime, timezone
+from typing import Any
 
 from firebase_admin import auth
 from firebase_admin.exceptions import NotFoundError
 
-from app.database import get_db
 from app.exceptions import UserCreationFailedError
 from app.models.user_model import User, UserRole
+from app.services.organization_service import OrganizationService
+from app.services.service import Service
 
 
-class UserService:
-    def __init__(self):
-        self.db = get_db()
+class UserService(Service):
+    def __init__(self, operating_uid="", admin=False) -> None:
+        super().__init__()
+
+        self.operating_uid: str = operating_uid
+        self.admin: bool = admin
+
+    def _create(self, model: User) -> None:
+        self.db.collection("users").document(model.uid).set(model.__dict__())
+
+    def _read(self, id: str) -> User:
+        doc_ref = self.db.collection("users").document(id)
+        doc = doc_ref.get()
+        if not doc.exists:
+            raise NotFoundError("User not found")
+        data = doc.to_dict()
+        user = User(**data)
+        if not user.active:
+            raise NotFoundError("User not found")
+        return user
+
+    def _update(self, model: User) -> None:
+        self.db.collection("users").document(model.uid).update(model.changes)
+
+    def _delete(self, model: User) -> None:
+        self.db.collection("users").document(model.uid).delete()
 
     def create_user(self, name: str, email: str, password: str, role: UserRole) -> User:
-        """
-        Creates a new user in Firebase Authentication and saves their details to the database.
-
-        Args:
-            name (str): The name of the user.
-            email (str): The email address of the user.
-            password (str): The password for the user's account.
-            role (UserRole): The role of the user.
-
-        Raises:
-            UserCreationFailedError: If the user creation process fails.
-
-        Returns:
-            User: The user object representing the created user.
-        """
         firebase_user = auth.create_user(email=email, password=password)
 
         if not firebase_user:
@@ -37,84 +47,58 @@ class UserService:
         uid: str = firebase_user.uid
 
         auth.set_custom_user_claims(uid, {"role": role})
-        current_time: datetime = datetime.now(timezone.utc)
         user: User = User(
             uid=uid,
             name=name,
             email=email,
             role=role,
-            active=True,
-            created_at=current_time,
-            updated_at=current_time,
         )
 
-        self.db.collection("users").document(uid).set(asdict(user))
+        self._create(user)
 
         return user
 
     def get_user(self, uid: str) -> User:
-        """
-        Retrieves a user from the database using their unique identifier.
+        return self._read(uid)
 
-        Args:
-            uid (str): The unique identifier of the user.
+    def update_user(self, uid: str, updates: dict[str, Any]) -> User:
+        if uid != self.operating_uid and not self.admin:
+            raise PermissionError("You do not have permission to perform this action.")
 
-        Raises:
-            NotFoundError: If a user with the specified identifier cannot be found in the database.
+        user: User = self._read(uid)
 
-        Returns:
-            User: The user object representing the retrieved user.
-        """
-        doc_ref = self.db.collection("users").document(uid)
-        doc = doc_ref.get()
-        if not doc.exists:
-            raise NotFoundError(f"User {uid} not found")
-        data = doc.to_dict()
-        user: User = User(**data)
+        for key, value in updates:
+            user.update_field(key, value)
+
+        self._update(user)
+
         return user
 
-    def update_user(self, user: User) -> None:
-        """
-        Updates the details of an existing user in the database.
-
-        Args:
-            user (User): The user object representing the updated user.
-
-        Raises:
-            NotFoundError: If the user with the specified identifier cannot be found in the database.
-
-        Returns:
-            None.
-        """
-        uid = user.uid
-        doc_ref = self.db.collection("users").document(uid)
-        doc = doc_ref.get()
-        if not doc.exists:
-            raise NotFoundError(f"User {uid} not found")
-
-        doc_ref.set(asdict(user))
-
     def delete_user(self, uid: str) -> None:
-        """
-        Soft-deletes an existing user in the database by setting their 'active' field to False.
+        if uid != self.operating_uid and not self.admin:
+            raise PermissionError("You do not have permission to perform this action.")
 
-        Args:
-            uid (str): The unique identifier of the user to be deleted.
+        user: User = self._read(uid)
 
-        Raises:
-            NotFoundError: If the user with the specified identifier cannot be found in the database.
+        # checks
+        # Can't be the owner of any organizations
 
-        Returns:
-            None.
-        """
-        doc_ref = self.db.collection("users").document(uid)
-        doc = doc_ref.get()
+        stream = (
+            self.db.collection("organizations").where("owner", "==", user.uid).stream()
+        )
+        if len(stream) > 0:
+            raise ValueError("User is the owner of an organization")
+        # need to be removed from any organization they are a coach of
 
-        if not doc.exists:
-            raise NotFoundError(f"User {uid} not found")
+        user.delete()
 
-        data = doc.to_dict()
-        user: User = User(**data)
-        user.update_field("active", False)
-        doc_ref.set(asdict(user))
+        self._update(user)
 
+    def get_users_by_ids(self, uids: list[str]) -> list[User]:
+        collection_ref = self.db.collection("users")
+        docs = (
+            collection_ref.where("uid", "in", uids).where("active", "==", True).stream()
+        )
+
+        users: list[User] = [User(**doc.to_dict()) for doc in docs]
+        return users
