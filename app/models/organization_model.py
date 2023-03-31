@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, List
+from typing import Any
+
+from google.cloud import firestore
 
 from app.models.model import Model
 from app.models.player_model import Player
@@ -33,13 +35,22 @@ class Organization(Model):
 
     organization_id: str
     name: str
-    created_at: datetime
-    updated_at: datetime
     owner: str  # uid of person who owns it
+    created_at: datetime = datetime.now(tz=timezone.utc)
+    updated_at: datetime = datetime.now(tz=timezone.utc)
     active: bool = True
     players: list[Player] = field(default_factory=list)  # subcollection
     teams: list[Team] = field(default_factory=list)  # subcollection
     coaches: list[str] = field(default_factory=list)  # list of uids
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def __dict__(self) -> dict[str, Any]:
+        super_dict = super().__dict__()
+        super_dict.pop("players")
+        super_dict.pop("teams")
+        return super_dict
 
     def update_field(self, key: str, value: Any) -> None:
         """
@@ -56,5 +67,33 @@ class Organization(Model):
             raise AttributeError(
                 f"Attribute {key} doesn't exist on {self.__class__.__name__}"
             )
+        super().update_field(key, value)
+        super().update_field("updated_at", datetime.now(timezone.utc))
 
-        object.__setattr__(self, key, value)
+    def delete(self):
+        """
+        Deletes the organization.
+        """
+        self.update_field("active", False)
+
+    def add_coach(self, coach_uid: str) -> None:
+        """
+        Adds a coach to the organization.
+
+        Args:
+            coach_uid (str): The uid of the coach to be added.
+        """
+        if coach_uid in self.coaches:
+            return
+
+        self.coaches.append(coach_uid)
+        self.changes["coaches"] = firestore.ArrayUnion([coach_uid])
+        super().update_field("updated_at", datetime.now(timezone.utc))
+
+    def remove_coach(self, coach_uid: str) -> None:
+        if coach_uid not in self.coaches:
+            return
+
+        self.coaches.remove(coach_uid)
+        self.changes["coaches"] = firestore.ArrayRemove([coach_uid])
+        super().update_field("updated_at", datetime.now(timezone.utc))

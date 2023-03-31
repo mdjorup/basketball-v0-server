@@ -20,17 +20,18 @@ class User(Model):
     name: str
     email: str
     role: UserRole
-    active: bool
-    created_at: datetime  # unix timestamp
-    updated_at: datetime  # unix timestamp
-    organization_ids: list[str] = field(default_factory=list)
+    created_at: datetime = datetime.now(tz=timezone.utc)
+    updated_at: datetime = datetime.now(tz=timezone.utc)
+    active: bool = True
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     def update_field(self, key: str, value: Any) -> None:
-        if key not in self.__annotations__.keys():
-            raise AttributeError("Attribute doesn't exist")
-        elif (
-            key == "uid" or key == "email" or key == "created_at" or key == "updated_at"
-        ):
+        if key == "uid" or key == "email" or key == "created_at" or key == "updated_at":
             raise AttributeError(f"Unable to edit attribute {key}")
-        object.__setattr__(self, key, value)
+        super().update_field(key, value)
         self.updated_at = datetime.now(timezone.utc)
+
+    def delete(self):
+        self.update_field("active", False)

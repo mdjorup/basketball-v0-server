@@ -27,12 +27,16 @@ class Team(Model):
 
     team_id: str
     name: str
+    active: bool = True
     wins: int = 0
     losses: int = 0
     ties: int = 0
     league_id: str = ""
     player_ids: list[str] = field(default_factory=list)
     game_ids: list[str] = field(default_factory=list)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     def update_field(self, key: str, value: Any) -> None:
         """

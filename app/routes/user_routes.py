@@ -1,5 +1,3 @@
-from dataclasses import asdict
-
 from firebase_admin.exceptions import PermissionDeniedError
 from flask import Blueprint, g, request
 
@@ -33,7 +31,7 @@ def create_new_user():
     )
 
     return build_response(
-        {"user": asdict(new_user)}, 201, f"User {new_user.uid} created successfully"
+        {"user": new_user.__dict__()}, 201, f"User {new_user.uid} created successfully"
     )
 
 
@@ -44,7 +42,7 @@ def get_user_by_id(uid: str):
     user: User = user_service.get_user(uid)
 
     return build_response(
-        {"user": asdict(user)}, 200, f"User {user.uid} retrieved successfully"
+        {"user": user.__dict__()}, 200, f"User {user.uid} retrieved successfully"
     )
 
 
@@ -53,27 +51,20 @@ def get_user_by_id(uid: str):
 def update_user_by_id(uid: str):
     # Vadidate that the user being updated is the same as the one in the token
     user_token_uid: str = g.decoded_token.get("uid")
-    if g.decoded_token.get("role") == "admin":
-        pass
-    elif not user_token_uid or user_token_uid != uid:
-        raise PermissionDeniedError("Can't update other users")
+    user_role: UserRole = g.decoded_token.get("role")
+    admin = user_role == "admin"
 
-    user_service = UserService()
+    user_service = UserService(operating_uid=user_token_uid, admin=admin)
 
     if not request.is_json:
         raise BadRequestError("Request body must be JSON")
 
     request_json: dict = request.get_json()
 
-    user: User = user_service.get_user(uid)
-
-    for key, value in request_json.items():
-        user.update_field(key, value)
-
-    user_service.update_user(user)
+    user: User = user_service.update_user(uid, request_json)
 
     return build_response(
-        {"user": asdict(user)}, 200, f"User {user.uid} updated successfully"
+        {"user": user.__dict__()}, 200, f"User {user.uid} updated successfully"
     )
 
 
@@ -82,28 +73,27 @@ def update_user_by_id(uid: str):
 def delete_user_by_id(uid: str):
     # Validate access
     user_token_uid: str = g.decoded_token.get("uid")
-    if g.decoded_token.get("role") == "admin":
-        pass
-    elif not user_token_uid or user_token_uid != uid:  # can't delete other users
-        raise PermissionDeniedError("Can't delete other users")
+    user_role: UserRole = g.decoded_token.get("role")
+    admin = user_role == "admin"
 
-    user_service = UserService()
+    user_service = UserService(operating_uid=user_token_uid, admin=admin)
 
     user_service.delete_user(uid)
-    return build_response({}, 200, f"User {uid} successfully deleted")
+    return build_response({}, 204, f"User {uid} successfully deleted")
 
 
 @user_blueprint.route("/me", methods=["GET"])
 @require_login
 def get_user_me():
     uid: str = g.decoded_token.get("uid")
+
     if not uid:
         raise PermissionDeniedError("Error getting user id from token")
 
-    user_service = UserService()
+    user_service = UserService(operating_uid=uid)
 
     user: User = user_service.get_user(uid)
 
     return build_response(
-        {"user": asdict(user)}, 200, f"User {user.uid} retrieved successfully"
+        {"user": user.__dict__()}, 200, f"User {user.uid} retrieved successfully"
     )

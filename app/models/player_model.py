@@ -41,10 +41,14 @@ class Player(Model):
     player_id: str
     first_name: str
     last_name: str
+    active: bool = True
     team_ids: list[str] = field(default_factory=list)
     height: float | None = None
     weight: float | None = None
     position: Position = Position.NA
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     def update_field(self, key: str, value: Any) -> None:
         """
