@@ -5,14 +5,16 @@ from flask import Flask
 from flask_cors import CORS
 
 from app.config import firebase_credentials, origins
-from app.exception_handlers import (handle_bad_request,
-                                    handle_email_already_exists,
-                                    handle_exception, handle_not_found,
-                                    handle_permission_denied,
-                                    handle_server_error,
-                                    handle_user_creation_failed)
-from app.exceptions import (BadRequestError, ServerError,
-                            UserCreationFailedError)
+from app.exception_handlers import (
+    handle_bad_request,
+    handle_email_already_exists,
+    handle_exception,
+    handle_not_found,
+    handle_permission_denied,
+    handle_server_error,
+    handle_user_creation_failed,
+)
+from app.exceptions import BadRequestError, ServerError, UserCreationFailedError
 from app.middlewares import before_request
 from app.routes.game_routes import game_blueprint
 from app.routes.league_routes import league_blueprint
@@ -34,7 +36,6 @@ initialize_app(cred)
 db = firestore.client()
 
 app.config["FIRESTORE_DB"] = db
-
 
 
 app.before_request(before_request)

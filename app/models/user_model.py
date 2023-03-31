@@ -26,20 +26,12 @@ class User(Model):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        
 
     def update_field(self, key: str, value: Any) -> None:
-        if (
-            key == "uid" or key == "email" or key == "created_at" or key == "updated_at"
-        ):
+        if key == "uid" or key == "email" or key == "created_at" or key == "updated_at":
             raise AttributeError(f"Unable to edit attribute {key}")
         super().update_field(key, value)
         self.updated_at = datetime.now(timezone.utc)
 
-
     def delete(self):
-        
         self.update_field("active", False)
-        
-    
-    

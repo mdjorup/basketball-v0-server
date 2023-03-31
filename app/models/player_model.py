@@ -49,7 +49,6 @@ class Player(Model):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        
 
     def update_field(self, key: str, value: Any) -> None:
         """

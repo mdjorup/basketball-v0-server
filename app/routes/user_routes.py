@@ -26,7 +26,6 @@ def create_new_user():
 
     user_service = UserService()
 
-
     new_user: User = user_service.create_user(
         name=name, email=email, password=password, role=role
     )
@@ -52,9 +51,9 @@ def get_user_by_id(uid: str):
 def update_user_by_id(uid: str):
     # Vadidate that the user being updated is the same as the one in the token
     user_token_uid: str = g.decoded_token.get("uid")
-    user_role : UserRole = g.decoded_token.get("role")
+    user_role: UserRole = g.decoded_token.get("role")
     admin = user_role == "admin"
-    
+
     user_service = UserService(operating_uid=user_token_uid, admin=admin)
 
     if not request.is_json:
@@ -63,7 +62,7 @@ def update_user_by_id(uid: str):
     request_json: dict = request.get_json()
 
     user: User = user_service.update_user(uid, request_json)
-    
+
     return build_response(
         {"user": user.__dict__()}, 200, f"User {user.uid} updated successfully"
     )
@@ -74,9 +73,9 @@ def update_user_by_id(uid: str):
 def delete_user_by_id(uid: str):
     # Validate access
     user_token_uid: str = g.decoded_token.get("uid")
-    user_role : UserRole = g.decoded_token.get("role")
+    user_role: UserRole = g.decoded_token.get("role")
     admin = user_role == "admin"
-    
+
     user_service = UserService(operating_uid=user_token_uid, admin=admin)
 
     user_service.delete_user(uid)
@@ -90,9 +89,9 @@ def get_user_me():
 
     if not uid:
         raise PermissionDeniedError("Error getting user id from token")
-    
+
     user_service = UserService(operating_uid=uid)
-    
+
     user: User = user_service.get_user(uid)
 
     return build_response(

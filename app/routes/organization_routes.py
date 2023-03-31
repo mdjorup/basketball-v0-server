@@ -27,24 +27,32 @@ organization_blueprint = Blueprint("organizations", __name__)
 def create_new_organization():
     if not request.is_json:
         raise BadRequestError("Request body must be JSON")
-    
+
     request_json: dict = request.get_json()
     name: str = request_json["name"]
-    coach_uid : str = g.decoded_token.get("uid")
+    coach_uid: str = g.decoded_token.get("uid")
     if not coach_uid:
         raise BadRequestError("User must be logged in to create an organization")
-    
+
     organization_service = OrganizationService(operating_uid=coach_uid)
     new_organization = organization_service.create_organization(name)
 
-    return build_response({"organization": new_organization.__dict__()}, 201, "Organization created successfully")
+    return build_response(
+        {"organization": new_organization.__dict__()},
+        201,
+        "Organization created successfully",
+    )
 
 
 @organization_blueprint.route("/<organization_id>", methods=["GET"])
 def get_organization_by_id(organization_id: str):
     organization_service = OrganizationService()
     organization: Organization = organization_service.get_organization(organization_id)
-    return build_response({"organization": organization.__dict__()}, 200, "Organization retrieved successfully")
+    return build_response(
+        {"organization": organization.__dict__()},
+        200,
+        "Organization retrieved successfully",
+    )
 
 
 @organization_blueprint.route("/<organization_id>", methods=["DELETE"])
@@ -57,18 +65,21 @@ def delete_organization_by_id(organization_id: str):
 
     organization_service.delete_organization(organization_id)
 
-    return build_response({}, 204, f"Organization {organization_id} deleted successfully")
-    
-    
+    return build_response(
+        {}, 204, f"Organization {organization_id} deleted successfully"
+    )
+
+
 @organization_blueprint.route("/<organization_id>/coaches", methods=["GET"])
 def get_coaches_from_organization(organization_id: str):
     organization_service = OrganizationService()
-    
-    coaches : list[User] = organization_service.get_organization_coaches(organization_id)
+
+    coaches: list[User] = organization_service.get_organization_coaches(organization_id)
     coaches_json = [coach.__dict__() for coach in coaches]
-    
-    
-    return build_response({"coaches": coaches_json}, 200, "Coaches retrieved successfully")
+
+    return build_response(
+        {"coaches": coaches_json}, 200, "Coaches retrieved successfully"
+    )
 
 
 @organization_blueprint.route("/<organization_id>/coaches/add", methods=["PUT"])
@@ -88,15 +99,13 @@ def add_coach_to_organization(organization_id: str):
     return build_response({}, 200, "Coach added successfully")
 
 
-@organization_blueprint.route(
-    "/<organization_id>/coaches/remove", methods=["PUT"]
-)
+@organization_blueprint.route("/<organization_id>/coaches/remove", methods=["PUT"])
 @authorized_roles(["coach", "admin"])
 def remove_coach_from_organization(organization_id: str):
     coach_uid = request.get_json().get("uid")
     if not coach_uid:
         raise BadRequestError("Must provide a uid to remove as a coach")
-    
+
     user_uid = g.decoded_token.get("uid")
     user_role = g.decoded_token.get("role")
     admin = user_role == "admin"
@@ -104,7 +113,11 @@ def remove_coach_from_organization(organization_id: str):
     organization_service = OrganizationService(operating_uid=user_uid, admin=admin)
     organization_service.remove_user_from_organization(organization_id, coach_uid)
 
-    return build_response({}, 200, f"Coach {coach_uid} deleted successfully from organization {organization_id}")
+    return build_response(
+        {},
+        200,
+        f"Coach {coach_uid} deleted successfully from organization {organization_id}",
+    )
 
 
 @organization_blueprint.route("/<organization_id>/coaches/transfer", methods=["PUT"])
@@ -113,16 +126,19 @@ def transfer_ownership_to_coach(organization_id: str):
     coach_uid = request.get_json().get("uid")
     if not coach_uid:
         raise BadRequestError("Must provide a uid to remove as a coach")
-    
+
     user_uid = g.decoded_token.get("uid")
     user_role = g.decoded_token.get("role")
     admin = user_role == "admin"
 
     organization_service = OrganizationService(operating_uid=user_uid, admin=admin)
     organization_service.transfer_organization_ownership(organization_id, coach_uid)
-    
-    return build_response({}, 200, f"Ownership of Organization {organization_id} transferred to {coach_uid} successfully")
 
+    return build_response(
+        {},
+        200,
+        f"Ownership of Organization {organization_id} transferred to {coach_uid} successfully",
+    )
 
 
 # Do these later, once players and teams are implemented

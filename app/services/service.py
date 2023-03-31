@@ -9,19 +9,19 @@ class Service(ABC):
         self.db = get_db()
 
     # abstract methods don't do any validation. They just do what they are told
-    # 
+    #
     @abstractmethod
-    def _create(self, model : Model, *args, **kwargs) -> None:
+    def _create(self, model: Model, *args, **kwargs) -> None:
         pass
 
     @abstractmethod
-    def _read(self, id : str, *args, **kwargs) -> Model:
+    def _read(self, id: str, *args, **kwargs) -> Model:
         pass
 
     @abstractmethod
-    def _update(self, model : Model, *args, **kwargs) -> None:
+    def _update(self, model: Model, *args, **kwargs) -> None:
         pass
 
     @abstractmethod
-    def _delete(self, model : Model, *args, **kwargs) -> None:
+    def _delete(self, model: Model, *args, **kwargs) -> None:
         pass

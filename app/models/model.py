@@ -5,7 +5,6 @@ from typing import Any
 
 @dataclass
 class Model:
-    
     changes: dict[str, Any]
 
     def __init__(self, **kwargs) -> None:
@@ -29,7 +28,6 @@ class Model:
         dict_self = asdict(self)
         dict_self.pop("changes")
         return dict_self
-
 
     def update_field(self, key: str, value: Any) -> None:
         if key not in self.__annotations__.keys():
